@@ -18,93 +18,29 @@ function LOGI() {
     echo -e "${green}[INF] $* ${plain}"
 }
 
-# check root
-[[ $EUID -ne 0 ]] && echo -e "${red}致命错误: ${plain} 请使用 root 权限运行此脚本\n" && exit 1
+cd ~
+uname_output=$(uname -a)
+enable_str="nohup \.\/x-ui run"
 
-# Check OS and set release variable
-if [[ -f /etc/os-release ]]; then
-    source /etc/os-release
-    release=$ID
-elif [[ -f /usr/lib/os-release ]]; then
-    source /usr/lib/os-release
-    release=$ID
+# Check OS
+if echo "$uname_output" | grep -Eqi "freebsd"; then
+    release="freebsd"
 else
-    echo -e "${red}检查服务器操作系统失败，请联系作者!${plain}" >&2
-    exit 1
+    echo -e "${red}未检测到系统版本，请联系脚本作者！${plain}\n" && exit 1
 fi
 
-echo -e "——————————————————————"
-echo -e "当前服务器的操作系统为:${red} $release${plain}"
-echo ""
-xui_version=$(/usr/local/x-ui/x-ui -v)
-last_version=$(curl -Ls "https://api.github.com/repos/xeefei/3x-ui/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-echo -e "${green}当前代理面板的版本为: ${red}〔3X-UI优化版〕v${xui_version}${plain}"
-echo ""
-echo -e "${yellow}〔3X-UI优化版〕最新版为---------->>> ${last_version}${plain}"
+arch="none"
 
-os_version=$(grep -i version_id /etc/os-release | cut -d \" -f2 | cut -d . -f1)
-
-if [[ "${release}" == "centos" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} 请使用 CentOS 8 或更高版本 ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "ubuntu" ]]; then
-    if [[ ${os_version} -lt 20 ]]; then
-        echo -e "${red} 请使用 Ubuntu 20 或更高版本!${plain}\n" && exit 1
-    fi
-
-elif [[ "${release}" == "fedora" ]]; then
-    if [[ ${os_version} -lt 36 ]]; then
-        echo -e "${red} 请使用 Fedora 36 或更高版本!${plain}\n" && exit 1
-    fi
-
-elif [[ "${release}" == "debian" ]]; then
-    if [[ ${os_version} -lt 11 ]]; then
-        echo -e "${red} 请使用 Debian 11 或更高版本 ${plain}\n" && exit 1
-    fi
-
-elif [[ "${release}" == "almalinux" ]]; then
-    if [[ ${os_version} -lt 9 ]]; then
-        echo -e "${red} 请使用 AlmaLinux 9 或更高版本 ${plain}\n" && exit 1
-    fi
-
-elif [[ "${release}" == "rocky" ]]; then
-    if [[ ${os_version} -lt 9 ]]; then
-        echo -e "${red} 请使用 RockyLinux 9 或更高版本 ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "arch" ]]; then
-    echo "您的操作系统是 ArchLinux"
-elif [[ "${release}" == "manjaro" ]]; then
-    echo "您的操作系统是 Manjaro"
-elif [[ "${release}" == "armbian" ]]; then
-    echo "您的操作系统是 Armbian"
-elif [[ "${release}" == "alpine" ]]; then
-    echo "您的操作系统是 Alpine Linux"
-elif [[ "${release}" == "opensuse-tumbleweed" ]]; then
-    echo "您的操作系统是 OpenSUSE Tumbleweed"
-elif [[ "${release}" == "oracle" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} 请使用 Oracle Linux 8 或更高版本 ${plain}\n" && exit 1
-    fi
+if echo "$uname_output" | grep -Eqi 'x86_64|amd64|x64'; then
+    arch="amd64"
+elif echo "$uname_output" | grep -Eqi 'aarch64|arm64'; then
+    arch="arm64"
 else
-    echo -e "${red}此脚本不支持您的操作系统。${plain}\n"
-    echo "请确保您使用的是以下受支持的操作系统之一："
-    echo "- Ubuntu 20.04+"
-    echo "- Debian 11+"
-    echo "- CentOS 8+"
-    echo "- Fedora 36+"
-    echo "- Arch Linux"
-    echo "- Parch Linux"
-    echo "- Manjaro"
-    echo "- Armbian"
-    echo "- Alpine Linux"
-    echo "- AlmaLinux 9+"
-    echo "- Rocky Linux 9+"
-    echo "- Oracle Linux 8+"
-    echo "- OpenSUSE Tumbleweed"
-    exit 1
-
+    arch="amd64"
+    echo -e "${red}检测架构失败，使用默认架构: ${arch}${plain}"
 fi
+
+echo "架构: ${arch}"
 
 # Declare Variables
 log_folder="${XUI_LOG_FOLDER:=/var/log}"
@@ -141,17 +77,6 @@ before_show_menu() {
     show_menu
 }
 
-install() {
-    bash <(curl -Ls https://raw.githubusercontent.com/xeefei/3x-ui/main/install.sh)
-    if [[ $? == 0 ]]; then
-        if [[ $# == 0 ]]; then
-            start
-        else
-            start 0
-        fi
-    fi
-}
-
 update() {
     confirm "$(echo -e "${green}该功能将强制安装最新版本，并且数据不会丢失。${red}你想继续吗？${plain}---->>请输入")" "y"
     if [[ $? != 0 ]]; then
@@ -161,7 +86,11 @@ update() {
         fi
         return 0
     fi
-    bash <(curl -Ls https://raw.githubusercontent.com/xeefei/3x-ui/main/install.sh)
+    cd ~
+    wget -N --no-check-certificate -O x-ui-install.sh https://raw.githubusercontent.com/wangzan200808/3x-ui/main/install.sh
+    chmod +x x-ui-install.sh
+    ./x-ui-install.sh
+	
     if [[ $? == 0 ]]; then
         LOGI "更新完成，面板已自动重启"
         exit 0
@@ -179,7 +108,7 @@ update_menu() {
         return 0
     fi
     
-    wget --no-check-certificate -O /usr/bin/x-ui https://raw.githubusercontent.com/xeefei/3x-ui/main/x-ui.sh
+    wget --no-check-certificate -O /usr/bin/x-ui https://raw.githubusercontent.com/wangzan200808/3x-ui/main/x-ui.sh
     chmod +x /usr/local/x-ui/x-ui.sh
     chmod +x /usr/bin/x-ui
     
@@ -201,7 +130,7 @@ custom_version() {
         exit 1
     fi
 
-    download_link="https://raw.githubusercontent.com/xeefei/3x-ui/master/install.sh"
+    download_link="https://raw.githubusercontent.com/wangzan/3x-ui/master/install.sh"
 
     # Use the entered panel version in the download link
     install_command="bash <(curl -Ls $download_link) v$panel_version"
@@ -224,18 +153,18 @@ uninstall() {
         fi
         return 0
     fi
-    systemctl stop x-ui
-    systemctl disable x-ui
-    rm /etc/systemd/system/x-ui.service -f
-    systemctl daemon-reload
-    systemctl reset-failed
-    rm /etc/x-ui/ -rf
-    rm /usr/local/x-ui/ -rf
+    stop_x-ui
+    crontab -l > x-ui.cron
+    sed -i "" "/x-ui.log/d" x-ui.cron
+    crontab x-ui.cron
+    rm x-ui.cron
+    cd ~
+    rm -rf ~/x-ui/
 
     echo ""
     echo -e "卸载成功\n"
     echo "如果您需要再次安装此面板，可以使用以下命令:"
-    echo -e "${green}bash <(curl -Ls https://raw.githubusercontent.com/xeefei/3x-ui/master/install.sh)${plain}"
+    echo -e "${green}bash <(curl -Ls https://raw.githubusercontent.com/wangzan200808/3x-ui/master/install.sh)${plain}"
     echo ""
     # Trap the SIGTERM signal
     trap delete_script SIGTERM
@@ -328,7 +257,8 @@ start() {
         echo ""
         LOGI "面板正在运行，无需再次启动，如需重新启动，请选择重新启动"
     else
-        systemctl start x-ui
+        cd ~/x-ui
+        nohup ./x-ui run > ./x-ui.log 2>&1 &
         sleep 2
         check_status
         if [[ $? == 0 ]]; then
@@ -365,7 +295,8 @@ stop() {
 }
 
 restart() {
-    systemctl restart x-ui
+    stop 0
+    start 0
     sleep 2
     check_status
     if [[ $? == 0 ]]; then
@@ -379,14 +310,26 @@ restart() {
 }
 
 status() {
-    systemctl status x-ui -l
+    COMMAND_NAME="./x-ui run"
+    PID=$(pgrep -f "$COMMAND_NAME")
+ 
+    # 检查是否找到了进程
+    if [ ! -z "$PID" ]; then
+        LOGI "x-ui 运行中"
+    else
+        LOGI "x-ui 没有运行"
+    fi
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
 }
 
 enable() {
-    systemctl enable x-ui
+    crontab -l > x-ui.cron
+    sed -i "" "/$enable_str/d" x-ui.cron
+    echo "@reboot cd $cur_dir/x-ui && nohup ./x-ui run > ./x-ui.log 2>&1 &" >> x-ui.cron
+    crontab x-ui.cron
+    rm x-ui.cron
     if [[ $? == 0 ]]; then
         LOGI "x-ui 已成功设置开机启动"
     else
@@ -399,7 +342,10 @@ enable() {
 }
 
 disable() {
-    systemctl disable x-ui
+    crontab -l > x-ui.cron
+    sed -i "" "/$enable_str/d" x-ui.cron
+    crontab x-ui.cron
+    rm x-ui.cron
     if [[ $? == 0 ]]; then
         LOGI "x-ui 已成功取消开机启动"
     else
@@ -512,7 +458,7 @@ enable_bbr() {
 }
 
 update_shell() {
-    wget -O /usr/bin/x-ui -N --no-check-certificate https://github.com/xeefei/3x-ui/raw/main/x-ui.sh
+    wget -O /usr/bin/x-ui -N --no-check-certificate https://github.com/wangzan200808/3x-ui/raw/main/x-ui.sh
     if [[ $? != 0 ]]; then
         echo ""
         LOGE "下载脚本失败，请检查机器是否可以连接至 GitHub"
@@ -525,11 +471,14 @@ update_shell() {
 
 # 0: running, 1: not running, 2: not installed
 check_status() {
-    if [[ ! -f /etc/systemd/system/x-ui.service ]]; then
+    if [[ ! -f ~/x-ui/x-ui ]]; then
         return 2
     fi
-    temp=$(systemctl status x-ui | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
-    if [[ "${temp}" == "running" ]]; then
+    COMMAND_NAME="./x-ui run"
+    PID=$(pgrep -f "$COMMAND_NAME")
+ 
+    # 检查是否找到了进程
+    if [ ! -z "$PID" ]; then
         return 0
     else
         return 1
@@ -537,8 +486,10 @@ check_status() {
 }
 
 check_enabled() {
-    temp=$(systemctl is-enabled x-ui)
-    if [[ "${temp}" == "enabled" ]]; then
+    cron_str=$(crontab -l)
+ 
+    # 检查grep的退出状态码
+    if echo "$cron_str" | grep -Eqi "$enable_str"; then
         return 0
     else
         return 1
