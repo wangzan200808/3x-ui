@@ -69,5 +69,4 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
           file: x-ui-freebsd-amd64.tar.gz
-          asset_name: x-ui-freebsd-amd64.tar.gz
           prerelease: true
