@@ -30,36 +30,36 @@ jobs:
             pkg install -y wget curl git gcc bash gawk gsed
             wget https://dl.google.com/go/go1.22.0.freebsd-amd64.tar.gz && tar -C /usr/local -xzf go1.22.0.freebsd-amd64.tar.gz && rm go1.22.0.freebsd-amd64.tar.gz
             ln -s /usr/local/go/bin/go /usr/local/bin/go
-        run: |
-          CGO_ENABLED=1
-          GOOS=freebsd
-          GOARCH=amd64
-          go build -o xui-release -v main.go
+          run: |
+            CGO_ENABLED=1
+            GOOS=freebsd
+            GOARCH=amd64
+            go build -o xui-release -v main.go
           
-          mkdir x-ui
-          cp xui-release x-ui/
-          cp x-ui.service x-ui/
-          cp x-ui.sh x-ui/
-          mv x-ui/xui-release x-ui/x-ui
-          mkdir x-ui/bin
-          cd x-ui/bin
+            mkdir x-ui
+            cp xui-release x-ui/
+            cp x-ui.service x-ui/
+            cp x-ui.sh x-ui/
+            mv x-ui/xui-release x-ui/x-ui
+            mkdir x-ui/bin
+            cd x-ui/bin
           
-          # Download dependencies
-          Xray_URL="https://github.com/XTLS/Xray-core/releases/latest/download/"
-          if [ "${{ matrix.platform }}" == "freebsd" ]; then
+            # Download dependencies
+            Xray_URL="https://github.com/XTLS/Xray-core/releases/latest/download/"
+            if [ "${{ matrix.platform }}" == "freebsd" ]; then
             wget ${Xray_URL}Xray-freebsd-64.zip
             unzip Xray-freebsd-64.zip
             rm -f Xray-freebsd-64.zip
-          fi
-          rm -f geoip.dat geosite.dat
-          wget https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat
-          wget https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
-          wget -O geoip_IR.dat https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geoip.dat
-          wget -O geosite_IR.dat https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geosite.dat
-          wget -O geoip_VN.dat https://github.com/vuong2023/vn-v2ray-rules/releases/latest/download/geoip.dat
-          wget -O geosite_VN.dat https://github.com/vuong2023/vn-v2ray-rules/releases/latest/download/geosite.dat
-          mv xray xray-freebsd-amd64
-          cd ../..
+            fi
+            rm -f geoip.dat geosite.dat
+            wget https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat
+            wget https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
+            wget -O geoip_IR.dat https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geoip.dat
+            wget -O geosite_IR.dat https://github.com/chocolate4u/Iran-v2ray-rules/releases/latest/download/geosite.dat
+            wget -O geoip_VN.dat https://github.com/vuong2023/vn-v2ray-rules/releases/latest/download/geoip.dat
+            wget -O geosite_VN.dat https://github.com/vuong2023/vn-v2ray-rules/releases/latest/download/geosite.dat
+            mv xray xray-freebsd-amd64
+            cd ../..
           
       - name: Package
         run: tar -zcvf x-ui-freebsd-amd64.tar.gz x-ui
