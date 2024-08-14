@@ -22,9 +22,16 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Build x-ui
+      - name: build freedbsd amd64 version
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: |
+            pkg install -y wget curl git gcc bash gawk gsed
+            wget https://dl.google.com/go/go1.22.0.freebsd-amd64.tar.gz && tar -C /usr/local -xzf go1.22.0.freebsd-amd64.tar.gz && rm go1.22.0.freebsd-amd64.tar.gz
+            ln -s /usr/local/go/bin/go /usr/local/bin/go
         run: |
-          CGO_ENABLED=0
+          CGO_ENABLED=1
           GOOS=freebsd
           GOARCH=amd64
           go build -o xui-release -v main.go
@@ -38,7 +45,7 @@ jobs:
           cd x-ui/bin
           
           # Download dependencies
-          Xray_URL="https://github.com/XTLS/Xray-core/releases/download/v1.8.23/"
+          Xray_URL="https://github.com/XTLS/Xray-core/releases/latest/download/"
           if [ "${{ matrix.platform }}" == "freebsd" ]; then
             wget ${Xray_URL}Xray-freebsd-64.zip
             unzip Xray-freebsd-64.zip
