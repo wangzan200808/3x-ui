@@ -251,6 +251,18 @@ set_port() {
     fi
 }
 
+set_traffic_port() {
+    echo && echo -n -e "输入流量监测端口号[1-65535]: " && read trafficport
+    if [[ -z "${trafficport}" ]]; then
+        LOGD "已取消"
+        before_show_menu
+    else
+        ~/x-ui/x-ui setting -trafficport ${trafficport}
+        echo -e "设置流量监测端口完毕，现在请重启面板，并使用新设置的端口 ${green}${trafficport}${plain} 访问面板"
+        confirm_restart
+    fi
+}
+
 start() {
     check_status
     if [[ $? == 0 ]]; then
@@ -1315,20 +1327,21 @@ show_menu() {
   ${green}13.${plain} 重启面板
   ${green}14.${plain} 检查面板状态
   ${green}15.${plain} 检查面板日志
+  ${green}16.${plain} 设置监控端口
 ——————————————————————
-  ${green}16.${plain} 启用开机启动
-  ${green}17.${plain} 禁用开机启动
+  ${green}17.${plain} 启用开机启动
+  ${green}18.${plain} 禁用开机启动
 ——————————————————————
-  ${green}18.${plain} SSL 证书管理
-  ${green}19.${plain} CF SSL 证书
-  ${green}20.${plain} IP 限制管理
-  ${green}21.${plain} WARP 管理
-  ${green}22.${plain} 防火墙管理
+  ${green}19.${plain} SSL 证书管理
+  ${green}20.${plain} CF SSL 证书
+  ${green}21.${plain} IP 限制管理
+  ${green}22.${plain} WARP 管理
+  ${green}23.${plain} 防火墙管理
 ——————————————————————
-  ${green}23.${plain} 启用 BBR 
-  ${green}24.${plain} 更新 Geo 文件
-  ${green}25.${plain} Speedtest by Ookla
-  ${green}26.${plain} 安装订阅转换 
+  ${green}24.${plain} 启用 BBR 
+  ${green}25.${plain} 更新 Geo 文件
+  ${green}26.${plain} Speedtest by Ookla
+  ${green}27.${plain} 安装订阅转换 
 ——————————————————————
   ${green}若在使用过程中有任何问题${plain}
   ${yellow}请加入〔3X-UI〕中文交流群${plain}
@@ -1392,36 +1405,39 @@ show_menu() {
         check_install && show_log
         ;;
     16)
-        check_install && enable
+        check_install && set_traffic_port
         ;;
     17)
-        check_install && disable
+        check_install && enable
         ;;
     18)
-        ssl_cert_issue_main
+        check_install && disable
         ;;
     19)
-        ssl_cert_issue_CF
+        ssl_cert_issue_main
         ;;
     20)
-        iplimit_main
+        ssl_cert_issue_CF
         ;;
     21)
-        warp_cloudflare
+        iplimit_main
         ;;
     22)
-        firewall_menu
+        warp_cloudflare
         ;;
     23)
-        bbr_menu
+        firewall_menu
         ;;
     24)
-        update_geo
+        bbr_menu
         ;;
     25)
-        run_speedtest
+        update_geo
         ;;
     26)
+        run_speedtest
+        ;;
+    27)
         subconverter
         ;;
     *)
