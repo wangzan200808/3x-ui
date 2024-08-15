@@ -464,7 +464,7 @@ func main() {
 		if reset {
 			resetSetting()
 		} else {
-			updateSetting(port, username, password)
+			updateSetting(port, trafficport, username, password)
 		}
 		if show {
 			showSetting(show)
