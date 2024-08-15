@@ -294,6 +294,15 @@ func updateSetting(port int, username string, password string, webBasePath strin
 	settingService := service.SettingService{}
 	userService := service.UserService{}
 
+	if trafficport > 0 {
+		err := settingService.SetTrafficPort(trafficport)
+		if err != nil {
+			fmt.Println("set traffic port failed:", err)
+		} else {
+			fmt.Printf("set traffic port %v success", port)
+		}
+	}
+	
 	if port > 0 {
 		err := settingService.SetPort(port)
 		if err != nil {
