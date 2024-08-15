@@ -284,7 +284,7 @@ func updateTgbotSetting(tgBotToken string, tgBotChatid string, tgBotRuntime stri
 	}
 }
 
-func updateSetting(port int, trafficport int, username string, password string, webBasePath string) {
+func updateSetting(port int, trafficport int, username string, password string,) {
 	err := database.InitDB(config.GetDBPath())
 	if err != nil {
 		fmt.Println("Database initialization failed（初始化数据库失败）:", err)
@@ -294,15 +294,6 @@ func updateSetting(port int, trafficport int, username string, password string, 
 	settingService := service.SettingService{}
 	userService := service.UserService{}
 
-	if trafficport > 0 {
-		err := settingService.SetTrafficPort(trafficport)
-		if err != nil {
-			fmt.Println("set traffic port failed:", err)
-		} else {
-			fmt.Printf("set traffic port %v success", port)
-		}
-	}
-	
 	if port > 0 {
 		err := settingService.SetPort(port)
 		if err != nil {
@@ -311,7 +302,14 @@ func updateSetting(port int, trafficport int, username string, password string, 
 			fmt.Printf("Port set successfully（端口设置成功）: %v\n", port)
 		}
 	}
-
+	if trafficport > 0 {
+		err := settingService.SetTrafficPort(trafficport)
+		if err != nil {
+			fmt.Println("set traffic port failed:", err)
+		} else {
+			fmt.Printf("set traffic port %v success", port)
+		}
+	}
 	if username != "" || password != "" {
 		err := userService.UpdateFirstUser(username, password)
 		if err != nil {
@@ -320,16 +318,6 @@ func updateSetting(port int, trafficport int, username string, password string, 
 			fmt.Println("Username and password updated successfully------>>用户名和密码更新成功")
 		}
 	}
-
-	if webBasePath != "" {
-		err := settingService.SetBasePath(webBasePath)
-		if err != nil {
-			fmt.Println("Failed to set base URI path（设置访问路径失败）:", err)
-		} else {
-			fmt.Println("Base URI path set successfully------>>设置访问路径成功")
-		}
-	}
-}
 
 func updateCert(publicKey string, privateKey string) {
 	err := database.InitDB(config.GetDBPath())
