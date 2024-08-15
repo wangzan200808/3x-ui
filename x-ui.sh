@@ -183,8 +183,8 @@ reset_user() {
     [[ -z $config_account ]] && config_account=$(date +%s%N | md5sum | cut -c 1-8)
     read -rp "请设置密码 [默认为随机密码]: " config_password
     [[ -z $config_password ]] && config_password=$(date +%s%N | md5sum | cut -c 1-8)
-    /usr/local/x-ui/x-ui setting -username ${config_account} -password ${config_password} >/dev/null 2>&1
-    /usr/local/x-ui/x-ui setting -remove_secret >/dev/null 2>&1
+    ~/x-ui/x-ui setting -username ${config_account} -password ${config_password} >/dev/null 2>&1
+    ~/x-ui/x-ui setting -remove_secret >/dev/null 2>&1
     echo -e "面板登录用户名已重置为：${green} ${config_account} ${plain}"
     echo -e "面板登录密码已重置为：${green} ${config_password} ${plain}"
     echo -e "${yellow} 面板 Secret Token 已禁用 ${plain}"
@@ -209,7 +209,7 @@ reset_webbasepath() {
     fi
     
     # Apply the new web base path setting
-    /usr/local/x-ui/x-ui setting -webBasePath "${config_webBasePath}" >/dev/null 2>&1
+    ~/x-ui/x-ui setting -webBasePath "${config_webBasePath}" >/dev/null 2>&1
     systemctl restart x-ui
     
     # Display confirmation message
@@ -225,13 +225,13 @@ reset_config() {
         fi
         return 0
     fi
-    /usr/local/x-ui/x-ui setting -reset
+    ~/x-ui/x-ui setting -reset
     echo -e "所有面板设置已重置为默认，请立即重新启动面板，并使用默认的${green}2053${plain}端口访问网页面板"
     confirm_restart
 }
 
 check_config() {
-    info=$(/usr/local/x-ui/x-ui setting -show true)
+    info=$(~/x-ui/x-ui setting -show true)
     if [[ $? != 0 ]]; then
         LOGE "获取当前设置错误，请检查日志"
         show_menu
@@ -245,7 +245,7 @@ set_port() {
         LOGD "Cancelled"
         before_show_menu
     else
-        /usr/local/x-ui/x-ui setting -port ${port}
+        ~/x-ui/x-ui setting -port ${port}
         echo -e "端口已设置，请立即重启面板，并使用新端口 ${green}${port}${plain} 以访问面板"
         confirm_restart
     fi
@@ -291,7 +291,7 @@ stop() {
         echo ""
         LOGI "面板已关闭，无需再次关闭！"
     else
-        systemctl stop x-ui
+        stop_x-ui
         sleep 2
         check_status
         if [[ $? == 1 ]]; then
