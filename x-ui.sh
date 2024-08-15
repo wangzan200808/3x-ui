@@ -245,7 +245,7 @@ set_port() {
         LOGD "Cancelled"
         before_show_menu
     else
-        ~/x-ui/x-ui setting -port ${port}
+        /usr/local/x-ui/x-ui setting -port ${port}
         echo -e "端口已设置，请立即重启面板，并使用新端口 ${green}${port}${plain} 以访问面板"
         confirm_restart
     fi
