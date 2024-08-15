@@ -284,7 +284,7 @@ func updateTgbotSetting(tgBotToken string, tgBotChatid string, tgBotRuntime stri
 	}
 }
 
-func updateSetting(port int, trafficport int, username string, password string, webBasePath string) {
+func updateSetting(port int, trafficport int, username string, password string) {
 	err := database.InitDB(config.GetDBPath())
 	if err != nil {
 		fmt.Println("Database initialization failed（初始化数据库失败）:", err)
@@ -316,14 +316,6 @@ func updateSetting(port int, trafficport int, username string, password string, 
 			fmt.Println("Failed to update username and password（更新用户名和密码失败）:", err)
 		} else {
 			fmt.Println("Username and password updated successfully------>>用户名和密码更新成功")
-		}
-	}
-	if webBasePath != "" {
-		err := settingService.SetBasePath(webBasePath)
-		if err != nil {
-			fmt.Println("Failed to set base URI path（设置访问路径失败）:", err)
-		} else {
-			fmt.Println("Base URI path set successfully------>>设置访问路径成功")
 		}
 	}
 }
