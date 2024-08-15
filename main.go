@@ -403,6 +403,7 @@ func main() {
 
 	settingCmd := flag.NewFlagSet("setting", flag.ExitOnError)
 	var port int
+	var trafficport int
 	var username string
 	var password string
 	var webBasePath string
@@ -419,6 +420,7 @@ func main() {
 	settingCmd.BoolVar(&show, "show", false, "Display current settings")
 	settingCmd.BoolVar(&remove_secret, "remove_secret", false, "Remove secret key")
 	settingCmd.IntVar(&port, "port", 0, "Set panel port number")
+	settingCmd.IntVar(&trafficport, "trafficport", 0, "set traffic stats collection port")
 	settingCmd.StringVar(&username, "username", "", "Set login username")
 	settingCmd.StringVar(&password, "password", "", "Set login password")
 	settingCmd.StringVar(&webBasePath, "webBasePath", "", "Set base path for Panel")
