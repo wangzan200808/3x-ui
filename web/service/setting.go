@@ -237,6 +237,17 @@ func (s *SettingService) GetXrayConfigTemplate() (string, error) {
 	return s.getString("xrayTemplateConfig")
 }
 
+func (s *SettingService) SetTrafficPort(port int) error {
+	templateConfig, err := s.getString("xrayTemplateConfig")
+	if err != nil {
+		return err
+	}
+	pattern := regexp.MustCompile(`"port": \d+,`)
+	replacement := fmt.Sprintf("\"port\": %d,",port)
+	templateConfig = pattern.ReplaceAllString(templateConfig, replacement)
+	return s.setString("xrayTemplateConfig",templateConfig)
+}
+
 func (s *SettingService) GetListen() (string, error) {
 	return s.getString("webListen")
 }
