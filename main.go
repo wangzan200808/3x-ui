@@ -284,7 +284,7 @@ func updateTgbotSetting(tgBotToken string, tgBotChatid string, tgBotRuntime stri
 	}
 }
 
-func updateSetting(port int, trafficport int, username string, password string,webBasePath string) {
+func updateSetting(port int, trafficport int, username string, password string, webBasePath string) {
 	err := database.InitDB(config.GetDBPath())
 	if err != nil {
 		fmt.Println("Database initialization failed（初始化数据库失败）:", err)
